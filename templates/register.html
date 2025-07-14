@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Student Registration</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.csrf_token }}
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.confirm_password.label(class="form-label") }}
+                        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else "")) }}
+                        {% if form.confirm_password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.confirm_password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form.branch.label(class="form-label") }}
+                            {{ form.branch(class="form-select" + (" is-invalid" if form.branch.errors else ""), **{'data-placeholder': 'Choose Branch'}) }}
+                            {% if form.branch.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.branch.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.semester.label(class="form-label") }}
+                            {{ form.semester(class="form-select" + (" is-invalid" if form.semester.errors else ""), **{'data-placeholder': 'Choose Semester'}) }}
+                            {% if form.semester.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.semester.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('login') }}" class="btn btn-secondary">Back to Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom styles for select boxes */
+    .form-select option[value=""][disabled] {
+        display: none;
+    }
+    
+    /* Style for selected option display */
+    .form-select option {
+        font-weight: normal;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup branch select
+    const branchSelect = document.querySelector('select[name="branch"]');
+    const defaultBranchOption = document.createElement('option');
+    defaultBranchOption.value = "";
+    defaultBranchOption.text = "Choose Branch";
+    defaultBranchOption.disabled = true;
+    defaultBranchOption.selected = true;
+    branchSelect.insertBefore(defaultBranchOption, branchSelect.firstChild);
+
+    // Store original branch texts
+    const originalTexts = {};
+    Array.from(branchSelect.options).forEach(option => {
+        if (option.value) {
+            originalTexts[option.value] = option.text;
+        }
+    });
+
+    // Handle branch selection
+    branchSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            // Only change the selected option's display text
+            const displayText = selectedOption.value;
+            selectedOption.text = displayText;
+        }
+    });
+
+    // When opening the dropdown, restore full names
+    branchSelect.addEventListener('mousedown', function() {
+        Array.from(this.options).forEach(option => {
+            if (option.value && originalTexts[option.value]) {
+                option.text = originalTexts[option.value];
+            }
+        });
+    });
+
+    // Setup semester select
+    const semesterSelect = document.querySelector('select[name="semester"]');
+    const defaultSemesterOption = document.createElement('option');
+    defaultSemesterOption.value = "";
+    defaultSemesterOption.text = "Choose Semester";
+    defaultSemesterOption.disabled = true;
+    defaultSemesterOption.selected = true;
+    semesterSelect.insertBefore(defaultSemesterOption, semesterSelect.firstChild);
+});
+</script>
+{% endblock %}

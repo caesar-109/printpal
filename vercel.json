@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "api/index.py",
+            "use": "@vercel/python"
+        },
+        {
+            "src": "static/**",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/static/(.*)",
+            "dest": "/static/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.py"
+        }
+    ],
+    "env": {
+        "FLASK_ENV": "production",
+        "PYTHON_VERSION": "3.12"
+    },
+    "functions": {
+        "api/*.py": {
+            "memory": 1024,
+            "maxDuration": 10
+        }
+    }
+} 

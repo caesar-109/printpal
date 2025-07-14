@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Profile Settings Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">Profile Settings</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" name="profile_form">
+                    {{ profile_form.csrf_token }}
+                    <div class="mb-3">
+                        {{ profile_form.username.label(class="form-label") }}
+                        {{ profile_form.username(class="form-control" + (" is-invalid" if profile_form.username.errors else "")) }}
+                        {% if profile_form.username.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in profile_form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Username can contain letters, numbers, and special characters (., @, +, -).</small>
+                    </div>
+                    <div class="mb-3">
+                        {{ profile_form.name.label(class="form-label") }}
+                        {{ profile_form.name(class="form-control" + (" is-invalid" if profile_form.name.errors else "")) }}
+                        {% if profile_form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in profile_form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ profile_form.branch.label(class="form-label") }}
+                            {{ profile_form.branch(class="form-select" + (" is-invalid" if profile_form.branch.errors else "")) }}
+                            {% if profile_form.branch.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in profile_form.branch.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {{ profile_form.semester.label(class="form-label") }}
+                            {{ profile_form.semester(class="form-select" + (" is-invalid" if profile_form.semester.errors else "")) }}
+                            {% if profile_form.semester.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in profile_form.semester.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" name="update_profile" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Change Card -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Change Password</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" name="password_form">
+                    {{ password_form.csrf_token }}
+                    <div class="mb-3">
+                        {{ password_form.current_password.label(class="form-label") }}
+                        {{ password_form.current_password(class="form-control" + (" is-invalid" if password_form.current_password.errors else "")) }}
+                        {% if password_form.current_password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in password_form.current_password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ password_form.new_password.label(class="form-label") }}
+                        {{ password_form.new_password(class="form-control" + (" is-invalid" if password_form.new_password.errors else "")) }}
+                        {% if password_form.new_password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in password_form.new_password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ password_form.confirm_password.label(class="form-label") }}
+                        {{ password_form.confirm_password(class="form-control" + (" is-invalid" if password_form.confirm_password.errors else "")) }}
+                        {% if password_form.confirm_password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in password_form.confirm_password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" name="change_password" class="btn btn-warning">Change Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include the same branch selection JavaScript from register.html -->
+<script>
+// ... (same JavaScript code for branch selection as in register.html)
+</script>
+{% endblock %} 

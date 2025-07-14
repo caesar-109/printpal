@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Sticky Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-printer me-2"></i>PrintPal Admin
+        </a>
+        <div class="d-flex">
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-light">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-people me-2"></i>Total Users
+                    </h5>
+                    <h2 class="mb-0">{{ stats.total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-person-check me-2"></i>Active Users
+                    </h5>
+                    <h2 class="mb-0">{{ stats.active_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-printer me-2"></i>Historical Total Requests
+                        <small class="d-block text-white-50">(All requests ever made)</small>
+                    </h5>
+                    <h2 class="mb-0">{{ stats.total_requests }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-hourglass-split me-2"></i>Current Pending Requests
+                    </h5>
+                    <h2 class="mb-0">{{ stats.pending_requests }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Control -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <i class="bi bi-gear me-2"></i>System Control
+        </div>
+        <div class="card-body">
+            <button class="btn {{ 'btn-danger' if system_status.is_active else 'btn-success' }}" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#toggleServiceModal">
+                <i class="bi {{ 'bi-power' if system_status.is_active else 'bi-play-circle' }} me-2"></i>
+                {{ 'Stop Service' if system_status.is_active else 'Start Service' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="card">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-people me-2"></i>User Management
+            </div>
+            <a href="{{ url_for('export_users') }}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-download me-2"></i>Export Users
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Filter Form -->
+            <form method="GET" class="row g-3 mb-4">
+                <div class="col-md-2">
+                    <select name="role" class="form-select">
+                        <option value="">All Roles</option>
+                        <option value="student" {{ 'selected' if request.args.get('role') == 'student' }}>Student</option>
+                        <option value="faculty" {{ 'selected' if request.args.get('role') == 'faculty' }}>Faculty</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="branch" class="form-select">
+                        <option value="">All Branches</option>
+                        {% for branch in branches %}
+                        <option value="{{ branch }}" {{ 'selected' if request.args.get('branch') == branch }}>{{ branch }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="semester" class="form-select">
+                        <option value="">All Semesters</option>
+                        {% for sem in range(1, 9) %}
+                        <option value="{{ sem }}" {{ 'selected' if request.args.get('semester')|int == sem }}>Semester {{ sem }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="active" {{ 'selected' if request.args.get('status') == 'active' }}>Active</option>
+                        <option value="inactive" {{ 'selected' if request.args.get('status') == 'inactive' }}>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search username..." 
+                               value="{{ request.args.get('search', '') }}">
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Users Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Name</th>
+                            <th>Branch</th>
+                            <th>Semester</th>
+                            <th>Registered On</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users.items %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>
+                                <span class="badge {{ 'bg-primary' if user.role == 'student' else 'bg-info' }}">
+                                    {{ user.role|title }}
+                                </span>
+                            </td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.branch or '-' }}</td>
+                            <td>{{ user.semester or '-' }}</td>
+                            <td>{{ format_date(user.registered_on) }}</td>
+                            <td>
+                                <span class="badge {{ 'bg-success' if user.is_active else 'bg-danger' }}">
+                                    {{ 'Active' if user.is_active else 'Inactive' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if not user.is_admin %}
+                                <button class="btn btn-sm {{ 'btn-danger' if user.is_active else 'btn-success' }}"
+                                        onclick="toggleUser({{ user.id }}, '{{ user.username }}', {{ user.is_active|tojson }})">
+                                    <i class="bi {{ 'bi-person-x' if user.is_active else 'bi-person-check' }}"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if users.pages > 1 %}
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{ 'disabled' if users.page == 1 }}">
+                        <a class="page-link" href="{{ url_for('admin_dashboard', page=users.prev_num, **request.args) if users.has_prev else '#' }}">Previous</a>
+                    </li>
+                    {% for page_num in users.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                        {% if page_num %}
+                            <li class="page-item {{ 'active' if page_num == users.page }}">
+                                <a class="page-link" href="{{ url_for('admin_dashboard', page=page_num, **request.args) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {{ 'disabled' if users.page == users.pages }}">
+                        <a class="page-link" href="{{ url_for('admin_dashboard', page=users.next_num, **request.args) if users.has_next else '#' }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Service Modal -->
+<div class="modal fade" id="toggleServiceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{ 'Stop' if system_status.is_active else 'Start' }} Print Service
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to {{ 'stop' if system_status.is_active else 'start' }} the print service?
+                {% if system_status.is_active %}
+                <div class="alert alert-warning mt-3">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    This will prevent new print requests until the service is started again.
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('admin_toggle_service') }}" method="POST" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn {{ 'btn-danger' if system_status.is_active else 'btn-success' }}">
+                        {{ 'Stop' if system_status.is_active else 'Start' }} Service
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle User Modal -->
+<div class="modal fade" id="toggleUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Toggle User Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to <span id="toggleAction"></span> the user <strong id="toggleUsername"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="toggleUserForm" method="POST" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn" id="toggleUserBtn"></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the user <strong id="deleteUsername"></strong>?
+                <div class="alert alert-danger mt-3">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    This action cannot be undone. All associated print requests will also be deleted.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteUserForm" method="POST" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleUser(userId, username, isActive) {
+    const modal = document.getElementById('toggleUserModal');
+    const form = document.getElementById('toggleUserForm');
+    const actionSpan = document.getElementById('toggleAction');
+    const usernameSpan = document.getElementById('toggleUsername');
+    const button = document.getElementById('toggleUserBtn');
+    
+    form.action = `/admin/toggle-user/${userId}`;
+    usernameSpan.textContent = username;
+    
+    if (isActive) {
+        actionSpan.textContent = 'deactivate';
+        button.textContent = 'Deactivate User';
+        button.className = 'btn btn-danger';
+    } else {
+        actionSpan.textContent = 'activate';
+        button.textContent = 'Activate User';
+        button.className = 'btn btn-success';
+    }
+    
+    new bootstrap.Modal(modal).show();
+}
+
+function deleteUser(userId, username) {
+    const modal = document.getElementById('deleteUserModal');
+    const form = document.getElementById('deleteUserForm');
+    const usernameSpan = document.getElementById('deleteUsername');
+    
+    form.action = `/admin/delete-user/${userId}`;
+    usernameSpan.textContent = username;
+    
+    new bootstrap.Modal(modal).show();
+}
+</script>
+{% endblock %} 
