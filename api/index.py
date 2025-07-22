@@ -27,11 +27,6 @@ def init_database():
     except Exception as e:
         return f'Error initializing database: {str(e)}', 500
 
-# Vercel requires the app to be named 'app'
-# Handle WSGI requests
-def handler(event, context):
-    return app(event, context)
-
 # For local development
 if __name__ == '__main__':
     app.run() 

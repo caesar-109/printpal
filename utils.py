@@ -12,18 +12,17 @@ def setup_logging(app):
         level=log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
-    # File handler
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
-    file_handler = logging.FileHandler('logs/printpal.log')
-    file_handler.setLevel(log_level)
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    ))
-    
-    # Add handlers
-    app.logger.addHandler(file_handler)
+
+    # Only add file handler if not running on Vercel
+    if not os.environ.get('VERCEL'):
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+        file_handler = logging.FileHandler('logs/printpal.log')
+        file_handler.setLevel(log_level)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        ))
+        app.logger.addHandler(file_handler)
     
 # Setup rate limiter
 limiter = Limiter(
