@@ -2,7 +2,7 @@ from main import create_app
 from models import db, User
 import os
 
-# Create the Flask application
+# Create the Flask application1
 app = create_app('production')
 
 # Database initialization endpoint (only available during setup)
