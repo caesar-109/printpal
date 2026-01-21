@@ -81,14 +81,16 @@ def create_app(config_name='default'):
             
         form = RegistrationForm()
         if form.validate_on_submit():
+            # Infer batch from branch: CSE-A/B/C => A/B/C, others => A
+            branch_value = form.branch.data
             batch_value = 'A'
-            if form.branch.data == 'CSE':
-                batch_value = (form.batch.data or '').strip() or 'A'
+            if branch_value and branch_value.startswith('CSE-') and len(branch_value) >= 5:
+                batch_value = branch_value.split('-')[-1] or 'A'
             user = User(
                 username=form.username.data,
                 role='student',
                 name=form.name.data,
-                branch=form.branch.data,
+                branch=branch_value,
                 year=form.year.data,
                 batch=batch_value,
                 semester=form.semester.data
