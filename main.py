@@ -28,6 +28,38 @@ def create_app(config_name='default'):
     csrf.init_app(app)
     init_limiter(app)
     setup_logging(app)
+
+    def _build_test_print_path(user):
+        """
+        Build a test print path for the student based on their details.
+        This is used only in the exported Excel file as a prototype.
+
+        Example:
+        C:\\TestStudents\\Btech\\CSE\\2023\\A\\ADMSN001\\print
+        """
+        base_path = r"C:\TestStudents\Btech"
+
+        # Derive branch folder from stored branch code
+        branch_code = (user.branch or "").split("-")[0] if user.branch else ""
+        branch_map = {
+            "AD": "AD",
+            "CE": "CE",
+            "CSD": "CSD",
+            "CSE": "CSE",
+            "ECE": "ECE",
+            "EEE": "EEE",
+            "IT": "IT",
+            "ME": "ME",
+        }
+        branch_folder = branch_map.get(branch_code, branch_code or "UNKNOWN")
+
+        # Year and batch (batch already inferred/stored in User)
+        year = user.year or "UNKNOWN"
+        batch = (getattr(user, "batch", None) or "A").upper()
+
+        admission_no = user.username or "UNKNOWN"
+
+        return rf"{base_path}\{branch_folder}\{year}\{batch}\{admission_no}\print"
     
     # Setup login manager
     login_manager.login_view = 'login'
@@ -408,7 +440,8 @@ def create_app(config_name='default'):
                 'Student Name': req.user.name,
                 'Semester': req.user.semester,
                 'Branch': req.user.branch,
-                'Username': req.user.username
+                'Username': req.user.username,
+                'Print Path (TEST)': _build_test_print_path(req.user)
             })
 
         # Create Excel file with multiple sheets
