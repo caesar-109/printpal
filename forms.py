@@ -37,13 +37,24 @@ class RegistrationForm(FlaskForm):
         ('AD', 'Artificial Intelligence and Data Science'),
         ('CE', 'Civil Engineering'),
         ('CSD', 'Computer Science and Design'),
-        ('CSE-A', 'Computer Science and Engineering - A'),
-        ('CSE-B', 'Computer Science and Engineering - B'),
-        ('CSE-C', 'Computer Science and Engineering - C'),
+        ('CSE', 'Computer Science and Engineering'),
         ('ECE', 'Electronics and Communication Engineering'),
         ('EEE', 'Electrical and Electronics Engineering'),
         ('IT', 'Information Technology'),
         ('ME', 'Mechanical Engineering')
+    ]
+
+    year_choices = [
+        ('2022', '2022'),
+        ('2023', '2023'),
+        ('2024', '2024'),
+        ('2025', '2025'),
+    ]
+
+    batch_choices = [
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
     ]
     
     semester_choices = [
@@ -58,6 +69,8 @@ class RegistrationForm(FlaskForm):
     ]
     
     branch = SelectField('Branch', choices=branch_choices, validators=[DataRequired()])
+    year = SelectField('Year', choices=year_choices, validators=[DataRequired()])
+    batch = SelectField('Batch', choices=batch_choices)  # Only used for CSE; others treated as A
     semester = SelectField('Semester', choices=semester_choices, validators=[DataRequired()])
     submit = SubmitField('Register')
 
@@ -80,9 +93,7 @@ class ProfileUpdateForm(FlaskForm):
         ('AD', 'Artificial Intelligence and Data Science'),
         ('CE', 'Civil Engineering'),
         ('CSD', 'Computer Science and Design'),
-        ('CSE-A', 'Computer Science and Engineering - A'),
-        ('CSE-B', 'Computer Science and Engineering - B'),
-        ('CSE-C', 'Computer Science and Engineering - C'),
+        ('CSE', 'Computer Science and Engineering'),
         ('ECE', 'Electronics and Communication Engineering'),
         ('EEE', 'Electrical and Electronics Engineering'),
         ('IT', 'Information Technology'),

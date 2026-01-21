@@ -14,6 +14,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), nullable=False)  # 'student', 'faculty', 'admin'
     name = db.Column(db.String(100))
     branch = db.Column(db.String(100), nullable=True)
+    year = db.Column(db.String(4), nullable=True)  # e.g. 2022, 2023...
+    batch = db.Column(db.String(1), nullable=True)  # A/B/C (CSE only); others treated as A
     semester = db.Column(db.String(2), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

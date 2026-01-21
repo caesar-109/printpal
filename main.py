@@ -81,11 +81,16 @@ def create_app(config_name='default'):
             
         form = RegistrationForm()
         if form.validate_on_submit():
+            batch_value = 'A'
+            if form.branch.data == 'CSE':
+                batch_value = (form.batch.data or '').strip() or 'A'
             user = User(
                 username=form.username.data,
                 role='student',
                 name=form.name.data,
                 branch=form.branch.data,
+                year=form.year.data,
+                batch=batch_value,
                 semester=form.semester.data
             )
             user.set_password(form.password.data)

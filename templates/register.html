@@ -55,7 +55,7 @@
                         {% endif %}
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             {{ form.branch.label(class="form-label") }}
                             {{ form.branch(class="form-select" + (" is-invalid" if form.branch.errors else ""), **{'data-placeholder': 'Choose Branch'}) }}
                             {% if form.branch.errors %}
@@ -66,7 +66,18 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            {{ form.year.label(class="form-label") }}
+                            {{ form.year(class="form-select" + (" is-invalid" if form.year.errors else ""), **{'data-placeholder': 'Choose Year'}) }}
+                            {% if form.year.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.year.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
                             {{ form.semester.label(class="form-label") }}
                             {{ form.semester(class="form-select" + (" is-invalid" if form.semester.errors else ""), **{'data-placeholder': 'Choose Semester'}) }}
                             {% if form.semester.errors %}
@@ -76,6 +87,20 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3" id="batchRow" style="display: none;">
+                        <div class="col-md-4">
+                            {{ form.batch.label(class="form-label") }}
+                            {{ form.batch(class="form-select" + (" is-invalid" if form.batch.errors else ""), **{'data-placeholder': 'Choose Batch'}) }}
+                            {% if form.batch.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.batch.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Only required for Computer Science (CSE). Other branches are treated as Batch A.</div>
                         </div>
                     </div>
                     <div class="d-grid gap-2">
@@ -104,6 +129,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Setup branch select
     const branchSelect = document.querySelector('select[name="branch"]');
+    const batchRow = document.getElementById('batchRow');
+    const batchSelect = document.querySelector('select[name="batch"]');
     const defaultBranchOption = document.createElement('option');
     defaultBranchOption.value = "";
     defaultBranchOption.text = "Choose Branch";
@@ -127,6 +154,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const displayText = selectedOption.value;
             selectedOption.text = displayText;
         }
+
+        // Show Batch only when branch is CSE; otherwise hide and default to A
+        if (this.value === 'CSE') {
+            batchRow.style.display = '';
+        } else {
+            batchRow.style.display = 'none';
+            if (batchSelect) batchSelect.value = 'A';
+        }
     });
 
     // When opening the dropdown, restore full names
@@ -146,6 +181,34 @@ document.addEventListener('DOMContentLoaded', function() {
     defaultSemesterOption.disabled = true;
     defaultSemesterOption.selected = true;
     semesterSelect.insertBefore(defaultSemesterOption, semesterSelect.firstChild);
+
+    // Setup year select
+    const yearSelect = document.querySelector('select[name="year"]');
+    const defaultYearOption = document.createElement('option');
+    defaultYearOption.value = "";
+    defaultYearOption.text = "Choose Year";
+    defaultYearOption.disabled = true;
+    defaultYearOption.selected = true;
+    yearSelect.insertBefore(defaultYearOption, yearSelect.firstChild);
+
+    // Setup batch select default (hidden unless CSE)
+    if (batchSelect) {
+        const defaultBatchOption = document.createElement('option');
+        defaultBatchOption.value = "";
+        defaultBatchOption.text = "Choose Batch";
+        defaultBatchOption.disabled = true;
+        defaultBatchOption.selected = true;
+        batchSelect.insertBefore(defaultBatchOption, batchSelect.firstChild);
+        batchSelect.value = 'A';
+    }
+
+    // Initial state
+    if (branchSelect && branchSelect.value !== 'CSE') {
+        if (batchRow) batchRow.style.display = 'none';
+        if (batchSelect) batchSelect.value = 'A';
+    } else if (branchSelect && branchSelect.value === 'CSE') {
+        if (batchRow) batchRow.style.display = '';
+    }
 });
 </script>
 {% endblock %}
