@@ -157,12 +157,14 @@ def create_app(config_name='default'):
         if form.validate_on_submit():
             user = User.query.filter_by(username=form.username.data).first()
             if user and user.check_password(form.password.data):
-                if user.is_admin():
-                    return redirect(url_for('admin_login'))
                 login_user(user)
+                user.last_login = datetime.utcnow()
+                db.session.commit()
                 app.logger.info(f'User logged in: {user.username}')
                 flash('Login successful!', 'success')
-                if user.is_student():
+                if user.is_admin():
+                    return redirect(url_for('admin_dashboard'))
+                elif user.is_student():
                     return redirect(url_for('student_dashboard'))
                 elif user.is_faculty():
                     return redirect(url_for('faculty_dashboard'))
@@ -1008,33 +1010,41 @@ def create_app(config_name='default'):
     @login_required
     def admin_toggle_service():
         if not current_user.is_admin():
-            return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+            flash('Access denied.', 'error')
+            return redirect(url_for('admin_dashboard'))
+        
+        password = request.form.get('password')
+        reason = request.form.get('reason')
+        
+        if not current_user.check_password(password):
+            flash('Invalid password. Action cancelled.', 'error')
+            return redirect(url_for('admin_dashboard'))
         
         try:
+            # Get or create system status
             status = SystemStatus.query.first()
             if not status:
                 status = SystemStatus(is_active=True)
                 db.session.add(status)
             
+            # Toggle status
             status.is_active = not status.is_active
             status.updated_at = datetime.utcnow()
             status.updated_by = current_user.id
-            status.reason = request.form.get('reason')
+            status.reason = reason
             
             db.session.commit()
             
-            new_status = 'activated' if status.is_active else 'terminated'
-            app.logger.info(f'Print service {new_status} by admin: {current_user.username}')
+            message = 'Print service activated.' if status.is_active else 'Print service terminated.'
+            app.logger.info(f'Print service {"activated" if status.is_active else "terminated"} by admin: {current_user.username}')
+            flash(message, 'success')
             
-            return jsonify({
-                'status': 'success',
-                'message': f'Print service has been {new_status}',
-                'is_active': status.is_active
-            })
         except Exception as e:
             db.session.rollback()
             app.logger.error(f'Failed to toggle service status: {str(e)}')
-            return jsonify({'status': 'error', 'message': 'Failed to update service status'}), 500
+            flash('Failed to update service status. Please try again.', 'error')
+        
+        return redirect(url_for('admin_dashboard'))
 
     @app.route('/admin/export-users')
     @login_required

@@ -30,7 +30,8 @@ pip install -r requirements_print_agent.txt
 
 echo.
 echo Step 4: Building EXE with PyInstaller...
-pyinstaller --onefile --windowed --name PrintAgent --clean print_agent.py
+echo Note: Using --console to show printing progress window
+pyinstaller --onefile --console --name PrintAgent --clean print_agent.py
 
 echo.
 echo ========================================

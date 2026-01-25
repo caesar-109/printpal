@@ -38,7 +38,11 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            {% if current_user.is_student() %}
+                            {% if current_user.is_admin() %}
+                                <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">
+                                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                                </a></li>
+                            {% elif current_user.is_student() %}
                                 <li><a class="dropdown-item" href="{{ url_for('student_dashboard') }}">
                                     <i class="bi bi-speedometer2 me-2"></i>Dashboard
                                 </a></li>
